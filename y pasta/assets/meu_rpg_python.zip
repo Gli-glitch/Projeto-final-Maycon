@@ -1,0 +1,226 @@
+import random
+import time
+
+# Configurações iniciais
+RANKS = {
+    "F": 1.1, "E": 1.2, "G": 1.5, 
+    "D": 2, "C": 3, "B": 5, 
+    "A": 10, "V": 35, "S": 90, 
+    "IX": 200, "X": 500
+}
+DUNGEON_UNLOCK_ORDER = ["F", "G", "A", "S", "???"]
+
+# Lista de drops dos bosses
+BOSS_DROPS = {
+    "F": [("Lâmina Afiada", 2, 70)],
+    "G": [("Chapéu Aventureiro", 3, 30), ("Lança de Gelo", 4.5, 20)],
+    "A": [("Armadura de Sangue", 15, 15)],
+    "S": [("Colar Dimensional Divino", 150, 5)],
+    "???": []  # Sem drop, jogo termina ao vencer
+}
+
+# Função para sorteio de rank
+def sortear_rank():
+    probabilidade = random.random()
+    if probabilidade <= 0.01: return "X"
+    if probabilidade <= 0.05: return "IX"
+    if probabilidade <= 0.10: return "S"
+    if probabilidade <= 0.15: return "V"
+    if probabilidade <= 0.25: return "A"
+    if probabilidade <= 0.40: return "B"
+    if probabilidade <= 0.60: return "C"
+    if probabilidade <= 0.75: return "D"
+    if probabilidade <= 0.90: return "G"
+    if probabilidade <= 0.98: return "E"
+    return "F"
+
+# Função para calcular dano
+def calcular_dano(forca, arma_mult):
+    return int(forca * arma_mult * random.uniform(0.8, 1.2))
+
+# Configurações iniciais do jogador
+def criar_jogador():
+    rank = sortear_rank()
+    multiplicador = RANKS[rank]
+    return {
+        "vida": 10 * multiplicador,
+	"vida_inicial": 10 * multiplicador,
+        "forca": 10 * multiplicador,
+        "agilidade": 10 * multiplicador,
+        "rank": rank,
+        "multiplicador": multiplicador,
+        "nivel": 1,
+        "pontos": 0,
+        "inventario": [],
+        "arma_equipada": None
+    }
+
+# Criar inimigos par[Aa as salas
+def criar_inimigos(quantidade, dificuldade):
+    inimigos = []
+    for _ in range(quantidade):
+        vida = random.randint(10, 25) * dificuldade
+        dano = random.randint(10, 20) * dificuldade
+        agilidade = random.randint(3, 8) * dificuldade
+        inimigos.append({"vida": vida, "dano": dano, "agilidade": agilidade})
+    return inimigos
+
+# Lógica da batalha
+def batalhar(jogador, inimigos):
+    while inimigos:
+        inimigo = inimigos[0]
+        while jogador["vida"] > 0 and inimigo["vida"] > 0:
+            if random.random() > inimigo["agilidade"] / 100:
+                dano_jogador = calcular_dano(jogador["forca"], jogador["arma_equipada"] if jogador["arma_equipada"] else 1)
+                inimigo["vida"] -= dano_jogador
+            if inimigo["vida"] > 0 and random.random() > jogador["agilidade"] / 100:
+                jogador["vida"] -= inimigo["dano"]
+        if jogador["vida"] <= 0:
+            return False
+        inimigos.pop(0)
+    return True
+
+# Função para enfrentar o boss
+def enfrentar_boss(jogador, dificuldade, rank):
+    boss = {
+        "vida": 200 * dificuldade,
+        "dano": 30 * dificuldade,
+        "agilidade": 15 * dificuldade
+    }
+    print("\n=== SALÃO DO BOSS ===")
+    if batalhar(jogador, [boss]):
+        print("VITÓRIA! O boss foi derrotado.")
+        jogador["pontos"] += 9
+        if rank in BOSS_DROPS:
+            for item, mult, chance in BOSS_DROPS[rank]:
+                if random.randint(1, 100) <= chance:
+                    jogador["inventario"].append((item, mult))
+                    print(f"Você obteve: {item} com multiplicador {mult}x!")
+                    break
+        if rank == "???":
+            print("\nPARABÉNS! Você venceu o jogo!")
+            exit()
+        return True
+    print("DERROTA, TENTE NOVAMENTE MAIS TARDE.")
+    jogador["vida"] = jogador["vida_inicial"]  # Restaura a vida inicial
+    return False
+
+# Menu de distribuição de pontos
+def distribuir_pontos(jogador):
+    while jogador["pontos"] > 0:
+        print("\n=== DISTRIBUA ===")
+        print(f"PONTOS DE STATUS: {jogador['pontos']}")
+        print("1. Vida")
+        print("2. Força")
+        print("3. Agilidade")
+        escolha = input("Qual status deseja colocar pontos? ").strip()
+        if escolha in ["1", "2", "3"]:
+            try:
+                pontos = int(input("Quantos pontos? ").strip())
+                if pontos <= jogador["pontos"] and pontos > 0:
+                    jogador["pontos"] -= pontos
+                    if escolha == "1":
+                        jogador["vida"] += pontos * jogador["multiplicador"]
+                    elif escolha == "2":
+                        jogador["forca"] += pontos * jogador["multiplicador"]
+                    elif escolha == "3":
+                        jogador["agilidade"] += pontos * jogador["multiplicador"]
+                else:
+                    print("Número de pontos inválido!")
+            except ValueError:
+                print("Entrada inválida.")
+        else:
+            print("Opção inválida.")
+    print("Todos os pontos foram distribuídos!")
+
+def menu(jogador):
+    desbloqueadas = ["F"]  # Dungeons desbloqueadas inicialmente
+    while True:
+        # Menu principal
+        print("\n=== STATUS ===")
+        print(f"VIDA: {jogador['vida']:.2f}")
+        print(f"FORÇA: {jogador['forca']:.2f}")
+        print(f"AGILIDADE: {jogador['agilidade']:.2f}")
+        print(f"Rank: {jogador['rank']}")
+        print(f"PONTOS DISPONÍVEIS: {jogador['pontos']}")
+        print("--- MENU ---")
+        print("1. Ver multiplicadores")
+        print("2. Dungeons")
+        print("3. Inventário")
+        print("4. Distribuir pontos")
+        print("5. Sair")
+
+        escolha = input("Escolha uma opção: ").strip()
+
+        # Opção 1: Exibir multiplicadores
+        if escolha == "1":
+            print(f"\n=== MULTI ===\nRank: {jogador['rank']}\nMultiplicadores: {jogador['multiplicador']}x")
+
+        # Opção 2: Dungeons
+        elif escolha == "2":
+            while True:
+                print("\n=== DUNGEONS ===")
+                for i, rank in enumerate(DUNGEON_UNLOCK_ORDER):
+                    status = "" if rank in desbloqueadas else "🔒"
+                    print(f"{i + 1}. Rank {rank} {status}")
+                print("0. Voltar")
+
+                dungeon = input("Escolha uma dungeon: ").strip()
+                if dungeon == "0":  # Voltar ao menu principal
+                    break
+
+                if dungeon.isdigit() and int(dungeon) - 1 < len(DUNGEON_UNLOCK_ORDER):
+                    rank = DUNGEON_UNLOCK_ORDER[int(dungeon) - 1]
+                    if rank in desbloqueadas:
+                        dificuldade = DUNGEON_UNLOCK_ORDER.index(rank) + 1
+                        for sala in range(1, 4):
+                            print(f"\n=== RANK {rank} ===\n== Sala {sala}/3 ==")
+                            inimigos = criar_inimigos(random.randint(1, 5), dificuldade)
+                            if batalhar(jogador, inimigos):
+                                print("VITÓRIA! Avançando para a próxima sala...")
+                                jogador["pontos"] += 3
+                                time.sleep(3)
+                            else:
+                                print("DERROTA, TENTE NOVAMENTE MAIS TARDE.")
+                                jogador["vida"] = jogador["vida_inicial"]  # Restaura a vida inicial
+                                break
+                        else:  # Executado apenas se o jogador passar pelas 3 salas
+                            if enfrentar_boss(jogador, dificuldade, rank):
+                                if rank != "???" and DUNGEON_UNLOCK_ORDER[dificuldade] not in desbloqueadas:
+                                    desbloqueadas.append(DUNGEON_UNLOCK_ORDER[dificuldade])
+                    else:
+                        print("Dungeon bloqueada!")
+
+        # Opção 3: Inventário
+        elif escolha == "3":
+            print("\n=== INVENTÁRIO ===")
+            if not jogador["inventario"]:
+                print("Seu inventário está vazio.")
+            else:
+                for i, (item, mult) in enumerate(jogador["inventario"], start=1):
+                    print(f"{i}. {item} ({mult}x)")
+
+                equipar = input("Digite o número da arma que deseja equipar: ").strip()
+                if equipar.isdigit() and 1 <= int(equipar) <= len(jogador["inventario"]):
+                    jogador["arma_equipada"] = jogador["inventario"][int(equipar) - 1][1]
+                    print(f"Você equipou {jogador['inventario'][int(equipar) - 1][0]}!")
+
+        # Opção 4: Distribuir pontos
+        elif escolha == "4":
+            distribuir_pontos(jogador)
+
+        # Opção 5: Sair do jogo
+        elif escolha == "5":
+            print("Saindo do jogo...")
+            break
+
+        # Entrada inválida
+        else:
+            print("Opção inválida!")
+
+# Início do jogo
+print("INICIANDO...")
+time.sleep(1)
+jogador = criar_jogador()
+print(f"SEU RANK É... {jogador['rank']}")
+menu(jogador)
