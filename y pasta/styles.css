@@ -1,90 +1,74 @@
-* {
+* { 
   margin:0;
   padding:0;
-  box-sizing:border-box; 
+  box-sizing:border-box;
 }
 body {
   font-family:Arial,sans-serif;
-  background:#f4f4f4;color:#333;
-  line-height:1.6; 
+  line-height:1.6;
+  background:#f4f4f4;
+  color:#333;
 }
-header, footer {
+header {
   background:#282c34;
   color:#fff;
+  padding:20px;
   text-align:center;
-  padding:20px; 
 }
 section {
   max-width:800px;
   margin:40px auto;
-  padding:0 20px; 
+  padding:0 20px;
 }
 h2 {
   margin-bottom:10px;
-  color:#282c34; 
+  color:#282c34;
 }
-
-/* Carrossel */
 #carousel {
   position:relative;
   overflow:hidden;
+  height:400px;
 }
 .carousel-track {
-  display:flex;
-  transition:transform .5s ease-in-out;
-}
-.carousel1{
-  flex: none;
-
-  width: 100%;
-  height: 400px;
-  scroll-snap-align: start;
+  display:flex; 
+  transition:transform 0.5s ease-in-out;
 }
 .carousel-track img {
-  width:100%;
-  height:auto;
+  width:100%; 
   flex-shrink:0;
 }
 .carousel-btn {
   position:absolute;
   top:50%;
   transform:translateY(-50%);
-  background:rgba(0,0,0,.5);
+  background:rgba(0,0,0,0.5);
   color:#fff;
   border:none;
   font-size:2rem;
   padding:10px;
-  cursor:pointer; 
+  cursor:pointer;
 }
 .prev {
-  left:10px; 
-} 
-.next {
-  right:10px; 
+  left:10px;
 }
-
-/* Colaboração */
+.next {
+  right:10px;
+}
 #colab {
   margin-top:20px;
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:10px; 
 }
 #colab input {
   padding:8px;
-  flex:1;
-  min-width:120px; 
+  width:150px;
 }
 #colab button {
-  padding:8px 16px; 
+  padding:8px 16px;
+  margin-left:10px;
 }
 #status {
   margin-top:10px;
-  color:green; 
+  color:green;
 }
-
-/* Download */
 #download button {
   padding:12px 24px;
   background:#61dafb;
@@ -92,20 +76,14 @@ h2 {
   color:#fff;
   font-size:1rem;
   cursor:pointer;
-  border-radius:5px; 
+  border-radius:5px;
 }
 #download button:hover {
-  background:#21a1f1; 
+  background:#21a1f1;
 }
-
-/* Responsividade */
-@media (min-width:600px) {
-  .carousel-track img {
-    width:50%; 
-  }
-}
-@media (min-width:900px) {
-  .carousel-track img {
-    width: 50%; 
-  }
+footer {
+  text-align:center;
+  background:#282c34;
+  color:#fff;
+  padding:15px 0;
 }
