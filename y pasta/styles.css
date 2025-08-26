@@ -27,14 +27,16 @@ h2 {
 #carousel {
   position:relative;
   overflow:hidden;
-  height:400px;
 }
 .carousel-track {
   display:flex; 
   transition:transform 0.5s ease-in-out;
+  width: 100%;
+  flex-shrink: 0;
+  object-fit: contain; /* mostra imagem inteira */
 }
 .carousel-track img {
-  width:100%; 
+  width: 100%; 
   flex-shrink:0;
 }
 .carousel-btn {
